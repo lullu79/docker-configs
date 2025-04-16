@@ -61,3 +61,28 @@ docker compose logs -f [서비스명]
 ```bash
 docker compose down && docker compose up -d
 ```
+
+# Docker Configs
+
+## 설정 방법
+
+1. `.env.example` 파일을 `.env`로 복사합니다:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. `.env` 파일을 열어 실제 값으로 환경 변수를 설정합니다:
+   - `ACME_EMAIL`: Let's Encrypt 인증서 발급용 이메일
+   - `CF_API_EMAIL`: Cloudflare 계정 이메일
+   - `CF_API_KEY`: Cloudflare API 키
+   - `TRAEFIK_DASHBOARD_DOMAIN`: Traefik 대시보드 접속 도메인
+
+3. Docker 컨테이너를 시작합니다:
+   ```bash
+   docker-compose up -d
+   ```
+
+## 보안 주의사항
+
+- `.env` 파일은 민감한 정보를 포함하고 있으므로 절대로 깃허브에 커밋하지 마세요.
+- `acme.json` 파일의 권한은 600으로 설정되어야 합니다.

@@ -4,6 +4,7 @@
 # Traefik ACME
 traefik/acme/*
 !traefik/acme/.gitkeep
+traefik/acme/acme.json
 
 # OS files
 .DS_Store
