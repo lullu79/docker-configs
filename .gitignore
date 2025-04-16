@@ -1,0 +1,10 @@
+# Environment variables
+.env
+
+# Traefik ACME
+traefik/acme/*
+!traefik/acme/.gitkeep
+
+# OS files
+.DS_Store
+*.log
