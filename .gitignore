@@ -9,3 +9,6 @@ traefik/acme/acme.json
 # OS files
 .DS_Store
 *.log
+
+# Plex Media Server
+plexmediaserver

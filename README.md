@@ -5,6 +5,7 @@
 ## 포함된 서비스
 
 - Traefik: 리버스 프록시 및 SSL 인증서 자동화
+- Plex Media Server: 미디어 스트리밍 서버
 
 ## 시작하기
 
@@ -38,9 +39,11 @@
 ├── docker-compose.yml    # 메인 Docker Compose 설정
 ├── .env                 # 환경 변수 (gitignore에 포함)
 ├── .env.example         # 환경 변수 예제
-└── traefik/
-    ├── acme/           # Let's Encrypt 인증서 저장소
-    └── config/         # Traefik 설정 파일들
+├── traefik/
+│   ├── acme/           # Let's Encrypt 인증서 저장소
+│   └── config/         # Traefik 설정 파일들
+└── plexmediaserver/    # Plex Media Server 설정 및 라이브러리
+    └── Library/        # Plex 라이브러리 및 설정 파일들
 ```
 
 ## 주의사항

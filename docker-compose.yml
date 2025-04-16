@@ -35,6 +35,38 @@ services:
     networks:
       - traefik-proxy
 
+  plex-official:
+    image: plexinc/pms-docker:latest
+    container_name: plexmediaserver
+    environment:
+      - TZ=Asia/Seoul
+      - PLEX_CLAIM=${PLEX_CLAIM}
+      - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
+    volumes:
+      - ~/docker-configs/plexmediaserver:/config
+      - ~/plexmediaserver:/plexmediaserver
+    ports:
+      - 32400:32400/tcp
+      - 8324:8324/tcp
+      - 32469:32469/tcp
+      - 1900:1900/udp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+    devices:
+      - /dev/dri:/dev/dri  # Intel Quick Sync 하드웨어 트랜스코딩 지원
+    restart: unless-stopped
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.plex.rule=Host(`${PLEX_DOMAIN}`)"
+      - "traefik.http.routers.plex.entrypoints=websecure"
+      - "traefik.http.routers.plex.tls=true"
+      - "traefik.http.routers.plex.tls.certresolver=myresolver"
+      - "traefik.http.services.plex.loadbalancer.server.port=32400"    
+
 networks:
   traefik-proxy:
     external: true
