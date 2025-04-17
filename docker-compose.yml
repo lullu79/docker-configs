@@ -3,6 +3,18 @@ services:
     image: traefik:v3.3
     container_name: traefik
     restart: unless-stopped
+    environment:
+      - CF_API_EMAIL=${CF_API_EMAIL}
+      - CF_API_KEY=${CF_API_KEY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/acme:/etc/traefik/acme
+      - ./traefik/config:/etc/traefik/config
+    networks:
+      - traefik-proxy
+    ports:
+      - "80:80"
+      - "443:443"
     command:
       - "--api.dashboard=true"
       - "--providers.docker=true"
@@ -17,27 +29,16 @@ services:
       - "--log.level=INFO"
       - "--providers.file.directory=/etc/traefik/config"
       - "--providers.file.watch=true"
-    environment:
-      - CF_API_EMAIL=${CF_API_EMAIL}
-      - CF_API_KEY=${CF_API_KEY}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_DASHBOARD_DOMAIN}`)"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/acme:/etc/traefik/acme
-      - ./traefik/config:/etc/traefik/config
-    networks:
-      - traefik-proxy
 
-  plex-official:
+  plexmediaserver:
     image: plexinc/pms-docker:latest
     container_name: plexmediaserver
+    restart: unless-stopped
     environment:
       - TZ=Asia/Seoul
       - PLEX_CLAIM=${PLEX_CLAIM}
@@ -45,6 +46,11 @@ services:
     volumes:
       - ~/docker-configs/plexmediaserver:/config
       - ~/plexmediaserver:/plexmediaserver
+      - ~/transmission:/transmission
+    devices:
+      - /dev/dri:/dev/dri
+    networks:
+      - traefik-proxy
     ports:
       - 32400:32400/tcp
       - 8324:8324/tcp
@@ -54,11 +60,6 @@ services:
       - 32412:32412/udp
       - 32413:32413/udp
       - 32414:32414/udp
-    devices:
-      - /dev/dri:/dev/dri  # Intel Quick Sync 하드웨어 트랜스코딩 지원
-    restart: unless-stopped
-    networks:
-      - traefik-proxy
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.plex.rule=Host(`${PLEX_DOMAIN}`)"
@@ -66,6 +67,31 @@ services:
       - "traefik.http.routers.plex.tls=true"
       - "traefik.http.routers.plex.tls.certresolver=myresolver"
       - "traefik.http.services.plex.loadbalancer.server.port=32400"    
+
+  deluge:
+    image: ghcr.io/linuxserver/deluge:latest
+    container_name: deluge
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Seoul
+    volumes:
+      - ~/docker-configs/deluge:/config
+      - ~/transmission:/downloads
+    networks:
+      - traefik-proxy
+    ports:
+      - 8112:8112
+      - 6881:6881
+      - 6881:6881/udp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.deluge.rule=Host(`${DELUGE_DOMAIN}`)"
+      - "traefik.http.routers.deluge.entrypoints=websecure"
+      - "traefik.http.routers.deluge.tls=true"
+      - "traefik.http.routers.deluge.tls.certresolver=myresolver"
+      - "traefik.http.services.deluge.loadbalancer.server.port=8112"
 
 networks:
   traefik-proxy:

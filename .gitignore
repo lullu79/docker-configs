@@ -12,3 +12,6 @@ traefik/acme/acme.json
 
 # Plex Media Server
 plexmediaserver
+
+# Deluge
+deluge

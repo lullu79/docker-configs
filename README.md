@@ -4,23 +4,41 @@
 
 ## 포함된 서비스
 
-- Traefik: 리버스 프록시 및 SSL 인증서 자동화
-- Plex Media Server: 미디어 스트리밍 서버
+- Traefik v3.3: 리버스 프록시 및 SSL 인증서 자동화 (Cloudflare DNS 인증 사용)
+- Plex Media Server: 미디어 스트리밍 서버 (하드웨어 가속 지원)
+- Deluge: 토렌트 클라이언트 (웹 UI 포함)
 
 ## 시작하기
 
-1. `.env` 파일 생성
+1. `.env` 파일 생성 및 설정
    - `.env.example` 파일을 복사하여 `.env` 파일을 생성합니다
    ```bash
    cp .env.example .env
    ```
-   - 생성된 `.env` 파일에 실제 값들을 입력합니다
-   - 도메인, API 키, 비밀번호 등 필요한 설정을 모두 입력해야 합니다
+   - 생성된 `.env` 파일에 실제 값들을 입력합니다:
+     
+     ### Cloudflare API 설정
+     - `CF_API_EMAIL`: Cloudflare 계정 이메일
+     - `CF_API_KEY`: Cloudflare Global API Key
+     - `CF_API_TOKEN`: Cloudflare API Token
+
+     ### Let's Encrypt 설정
+     - `ACME_EMAIL`: SSL 인증서 발급용 이메일 주소
+
+     ### Plex 설정
+     - `PLEX_CLAIM`: Plex.tv에서 발급받은 클레임 토큰 (https://www.plex.tv/claim/)
+     - `PLEX_ADVERTISE_IP`: Plex 서버 외부 접속 URL (예: https://plex.your-domain.com)
+
+     ### 도메인 설정
+     - `TRAEFIK_DASHBOARD_DOMAIN`: Traefik 대시보드 접속 도메인
+     - `PLEX_DOMAIN`: Plex 서버 접속 도메인
+     - `DELUGE_DOMAIN`: Deluge 웹UI 접속 도메인
 
 2. Cloudflare 설정
-   - Cloudflare 계정의 이메일과 Global API Key가 필요합니다
-   - Global API Key는 Cloudflare 대시보드 > Profile > API Tokens에서 확인할 수 있습니다
-   - DNS 레코드가 올바르게 설정되어 있는지 확인하세요
+   - Cloudflare 계정에서 필요한 인증 정보를 확인합니다:
+     - Global API Key: Cloudflare 대시보드 > Profile > API Tokens
+     - API Token: Cloudflare 대시보드 > API Tokens > Create Token
+   - 각 서비스의 도메인에 대한 DNS 레코드가 올바르게 설정되어 있는지 확인하세요
 
 3. 네트워크 생성
    ```bash
@@ -42,14 +60,26 @@
 ├── traefik/
 │   ├── acme/           # Let's Encrypt 인증서 저장소
 │   └── config/         # Traefik 설정 파일들
-└── plexmediaserver/    # Plex Media Server 설정 및 라이브러리
-    └── Library/        # Plex 라이브러리 및 설정 파일들
+├── plexmediaserver/    # Plex Media Server 설정 및 라이브러리
+└── deluge/            # Deluge 설정 디렉토리
 ```
+
+## 포트 설정
+
+- Traefik: 80 (HTTP), 443 (HTTPS)
+- Plex Media Server:
+  - 32400: 메인 서버 포트
+  - 8324, 32469: 추가 서비스 포트
+  - 1900, 32410-32414: DLNA 관련 포트
+- Deluge:
+  - 8112: 웹 UI 포트
+  - 6881: 토렌트 포트 (TCP/UDP)
 
 ## 주의사항
 
 - `.env` 파일에는 민감한 정보가 포함되어 있으므로 절대로 Git에 커밋하지 마세요
-- 실제 설정 시에는 `.env.example`을 참고하여 `.env` 파일을 생성하세요
+- `acme.json` 파일의 권한은 600으로 설정되어야 합니다
+- 하드웨어 가속을 위해 Plex 컨테이너에 `/dev/dri` 장치가 마운트되어 있습니다
 - 각 서비스의 포트가 다른 프로그램과 충돌하지 않도록 주의하세요
 - 정기적으로 Docker 이미지와 컨테이너를 업데이트하여 보안을 유지하세요
 
@@ -64,28 +94,3 @@ docker compose logs -f [서비스명]
 ```bash
 docker compose down && docker compose up -d
 ```
-
-# Docker Configs
-
-## 설정 방법
-
-1. `.env.example` 파일을 `.env`로 복사합니다:
-   ```bash
-   cp .env.example .env
-   ```
-
-2. `.env` 파일을 열어 실제 값으로 환경 변수를 설정합니다:
-   - `ACME_EMAIL`: Let's Encrypt 인증서 발급용 이메일
-   - `CF_API_EMAIL`: Cloudflare 계정 이메일
-   - `CF_API_KEY`: Cloudflare API 키
-   - `TRAEFIK_DASHBOARD_DOMAIN`: Traefik 대시보드 접속 도메인
-
-3. Docker 컨테이너를 시작합니다:
-   ```bash
-   docker-compose up -d
-   ```
-
-## 보안 주의사항
-
-- `.env` 파일은 민감한 정보를 포함하고 있으므로 절대로 깃허브에 커밋하지 마세요.
-- `acme.json` 파일의 권한은 600으로 설정되어야 합니다.
