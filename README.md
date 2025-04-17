@@ -8,6 +8,7 @@
 - Plex Media Server: 미디어 스트리밍 서버 (하드웨어 가속 지원)
 - Deluge: 토렌트 클라이언트 (웹 UI 포함)
 - Portainer: Docker 컨테이너 관리 웹 UI (CE 버전)
+- ipTIME: 공유기 관리 웹 인터페이스 프록시
 
 ## 시작하기
 
@@ -35,6 +36,7 @@
      - `PLEX_DOMAIN`: Plex 서버 접속 도메인
      - `DELUGE_DOMAIN`: Deluge 웹UI 접속 도메인
      - `PORTAINER_DOMAIN`: Portainer 웹UI 접속 도메인
+     - `IPTIME_DOMAIN`: ipTIME 공유기 관리 페이지 접속 도메인
 
 2. Cloudflare 설정
    - Cloudflare 계정에서 필요한 인증 정보를 확인합니다:
@@ -79,6 +81,8 @@
   - 6881: 토렌트 포트 (TCP/UDP)
 - Portainer:
   - 9000: 웹 UI 포트
+- ipTIME:
+  - 8080: 관리 인터페이스 포트
 
 ## 주의사항
 
@@ -89,6 +93,7 @@
 - 정기적으로 Docker 이미지와 컨테이너를 업데이트하여 보안을 유지하세요
 - Portainer 초기 설정 시 관리자 계정 생성이 필요합니다
 - Portainer의 데이터는 Docker 볼륨에 저장되므로, 백업이 필요한 경우 볼륨을 함께 백업하세요
+- iptime 서비스는 공유기의 관리 인터페이스(192.168.0.1:8080)를 안전하게 외부에 노출합니다
 
 ## 문제해결
 

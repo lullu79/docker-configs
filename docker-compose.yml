@@ -6,6 +6,7 @@ services:
     environment:
       - CF_API_EMAIL=${CF_API_EMAIL}
       - CF_API_KEY=${CF_API_KEY}
+      - IPTIME_DOMAIN=${IPTIME_DOMAIN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/acme:/etc/traefik/acme
@@ -112,8 +113,19 @@ services:
       - "traefik.http.routers.portainer.tls.certresolver=myresolver"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
 
-volumes:
-  portainer_data:
+  iptime:
+    image: alpine/socat
+    container_name: iptime
+    command: tcp-listen:8080,fork,reuseaddr tcp:192.168.0.1:8080
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.iptime.rule=Host(`${IPTIME_DOMAIN}`)"
+      - "traefik.http.routers.iptime.entrypoints=websecure"
+      - "traefik.http.routers.iptime.tls=true"
+      - "traefik.http.routers.iptime.tls.certresolver=myresolver"
+      - "traefik.http.services.iptime.loadbalancer.server.port=8080"
 
 networks:
   traefik-proxy:
