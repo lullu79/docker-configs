@@ -5,10 +5,10 @@
 ## 포함된 서비스
 
 - Traefik v3.3: 리버스 프록시 및 SSL 인증서 자동화 (Cloudflare DNS 인증 사용)
+- ipTIME: 공유기 관리 웹 인터페이스 프록시
 - Plex Media Server: 미디어 스트리밍 서버 (하드웨어 가속 지원)
 - Deluge: 토렌트 클라이언트 (웹 UI 포함)
 - Portainer: Docker 컨테이너 관리 웹 UI (CE 버전)
-- ipTIME: 공유기 관리 웹 인터페이스 프록시
 
 ## 시작하기
 
@@ -72,6 +72,8 @@
 ## 포트 설정
 
 - Traefik: 80 (HTTP), 443 (HTTPS)
+- ipTIME:
+  - 8080: 관리 인터페이스 포트
 - Plex Media Server:
   - 32400: 메인 서버 포트
   - 8324, 32469: 추가 서비스 포트
@@ -81,8 +83,6 @@
   - 6881: 토렌트 포트 (TCP/UDP)
 - Portainer:
   - 9000: 웹 UI 포트
-- ipTIME:
-  - 8080: 관리 인터페이스 포트
 
 ## 주의사항
 

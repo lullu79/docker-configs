@@ -36,6 +36,20 @@ services:
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
 
+  iptime:
+    image: alpine/socat
+    container_name: iptime
+    command: tcp-listen:8080,fork,reuseaddr tcp:192.168.0.1:8080
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.iptime.rule=Host(`${IPTIME_DOMAIN}`)"
+      - "traefik.http.routers.iptime.entrypoints=websecure"
+      - "traefik.http.routers.iptime.tls=true"
+      - "traefik.http.routers.iptime.tls.certresolver=myresolver"
+      - "traefik.http.services.iptime.loadbalancer.server.port=8080"
+
   plexmediaserver:
     image: plexinc/pms-docker:latest
     container_name: plexmediaserver
@@ -112,20 +126,6 @@ services:
       - "traefik.http.routers.portainer.tls=true"
       - "traefik.http.routers.portainer.tls.certresolver=myresolver"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-
-  iptime:
-    image: alpine/socat
-    container_name: iptime
-    command: tcp-listen:8080,fork,reuseaddr tcp:192.168.0.1:8080
-    networks:
-      - traefik-proxy
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.iptime.rule=Host(`${IPTIME_DOMAIN}`)"
-      - "traefik.http.routers.iptime.entrypoints=websecure"
-      - "traefik.http.routers.iptime.tls=true"
-      - "traefik.http.routers.iptime.tls.certresolver=myresolver"
-      - "traefik.http.services.iptime.loadbalancer.server.port=8080"
 
 networks:
   traefik-proxy:
