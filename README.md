@@ -7,6 +7,7 @@
 - Traefik v3.3: 리버스 프록시 및 SSL 인증서 자동화 (Cloudflare DNS 인증 사용)
 - Plex Media Server: 미디어 스트리밍 서버 (하드웨어 가속 지원)
 - Deluge: 토렌트 클라이언트 (웹 UI 포함)
+- Portainer: Docker 컨테이너 관리 웹 UI (CE 버전)
 
 ## 시작하기
 
@@ -33,6 +34,7 @@
      - `TRAEFIK_DASHBOARD_DOMAIN`: Traefik 대시보드 접속 도메인
      - `PLEX_DOMAIN`: Plex 서버 접속 도메인
      - `DELUGE_DOMAIN`: Deluge 웹UI 접속 도메인
+     - `PORTAINER_DOMAIN`: Portainer 웹UI 접속 도메인
 
 2. Cloudflare 설정
    - Cloudflare 계정에서 필요한 인증 정보를 확인합니다:
@@ -61,7 +63,8 @@
 │   ├── acme/           # Let's Encrypt 인증서 저장소
 │   └── config/         # Traefik 설정 파일들
 ├── plexmediaserver/    # Plex Media Server 설정 및 라이브러리
-└── deluge/            # Deluge 설정 디렉토리
+├── deluge/            # Deluge 설정 디렉토리
+└── portainer/         # Portainer 설정 및 데이터
 ```
 
 ## 포트 설정
@@ -74,6 +77,8 @@
 - Deluge:
   - 8112: 웹 UI 포트
   - 6881: 토렌트 포트 (TCP/UDP)
+- Portainer:
+  - 9000: 웹 UI 포트
 
 ## 주의사항
 
@@ -82,6 +87,8 @@
 - 하드웨어 가속을 위해 Plex 컨테이너에 `/dev/dri` 장치가 마운트되어 있습니다
 - 각 서비스의 포트가 다른 프로그램과 충돌하지 않도록 주의하세요
 - 정기적으로 Docker 이미지와 컨테이너를 업데이트하여 보안을 유지하세요
+- Portainer 초기 설정 시 관리자 계정 생성이 필요합니다
+- Portainer의 데이터는 Docker 볼륨에 저장되므로, 백업이 필요한 경우 볼륨을 함께 백업하세요
 
 ## 문제해결
 
