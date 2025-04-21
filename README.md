@@ -106,3 +106,72 @@ docker compose logs -f [서비스명]
 ```bash
 docker compose down && docker compose up -d
 ```
+
+## Authelia 설정 가이드
+
+### 초기 설정
+1. `authelia/configuration.yml.example` 파일을 `configuration.yml`로 복사합니다:
+   ```bash
+   cp authelia/configuration.yml.example authelia/configuration.yml
+   ```
+
+2. 보안을 위해 다음 비밀키들을 생성하여 변경해야 합니다:
+   - 세션 비밀키: `openssl rand -base64 32`
+   - 스토리지 암호화 키: `openssl rand -hex 64`
+   - JWT 비밀키: `openssl rand -hex 64`
+
+3. 도메인 설정:
+   - `example.com`을 실제 사용할 도메인으로 변경
+   - `authelia.example.com`, `traefik.example.com` 등의 서브도메인도 실제 도메인으로 변경
+
+4. 접근 제어 규칙 설정:
+   - `access_control` 섹션에서 각 서비스별 접근 정책 설정
+   - `one_factor`: 일반 로그인
+   - `two_factor`: 2단계 인증 필요
+
+5. 세션 설정:
+   - `expiration`: 세션 유효 기간 (기본값: 1시간)
+   - `inactivity`: 비활성 시간 제한 (기본값: 5분)
+   - `remember_me`: 자동 로그인 지속 시간 (기본값: 1개월)
+
+### 사용자 관리
+사용자 정보는 `/config/users/users.yml` 파일에서 관리됩니다. 사용자 추가는 별도의 가이드를 참고하세요.
+
+### 보안 설정
+- `regulation` 섹션에서 로그인 시도 제한을 설정할 수 있습니다
+- 기본값으로 3회 실패시 5분간 차단됩니다
+- 필요에 따라 `max_retries`, `find_time`, `ban_time` 값을 조정하세요
+
+### Authelia 사용자 관리 가이드
+
+1. `users/users.yml.example` 파일을 `users.yml`로 복사합니다:
+   ```bash
+   cp authelia/users/users.yml.example authelia/users/users.yml
+   ```
+
+2. 비밀번호 해시 생성:
+   ```bash
+   docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password '설정할_비밀번호'
+   ```
+   생성된 해시를 users.yml 파일의 password 필드에 입력하세요.
+
+3. 사용자 추가 방법:
+   ```yaml
+   users:
+     사용자이름:
+       displayname: "표시될 이름"
+       password: "생성된_비밀번호_해시"
+       email: "이메일주소"
+       groups:
+         - 그룹이름
+   ```
+
+4. 사용자 그룹:
+   - admins: 관리자 그룹
+   - users: 일반 사용자 그룹
+   - 필요에 따라 추가 그룹을 생성하여 사용할 수 있습니다
+
+5. 주의사항:
+   - 기본 admin 계정의 비밀번호는 반드시 변경하세요
+   - 비밀번호는 반드시 해시로 변환하여 저장해야 합니다
+   - 이메일 주소는 실제 사용 가능한 주소를 입력하세요

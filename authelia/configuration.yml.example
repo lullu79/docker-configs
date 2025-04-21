@@ -1,0 +1,69 @@
+# Authelia 설정 파일 예제
+# 실제 사용 시 이 파일을 configuration.yml로 복사하여 사용하세요
+
+---
+# 서버 설정
+server:
+  # Authelia 서버가 수신할 주소와 포트
+  address: 'tcp://0.0.0.0:9092'
+
+# 로깅 설정
+log:
+  # 로그 레벨: debug, info, warn, error
+  level: info
+
+# 인증 백엔드 설정
+authentication_backend:
+  # 파일 기반 사용자 데이터베이스 설정
+  file:
+    path: /config/users/users.yml  # 사용자 정보가 저장된 YAML 파일 경로
+
+# 접근 제어 규칙
+access_control:
+  # 기본 정책: deny (거부) 또는 allow (허용)
+  default_policy: deny
+  rules:
+    # 도메인별 접근 정책 설정
+    - domain: traefik.example.com     # 실제 도메인으로 변경하세요
+      policy: one_factor              # one_factor 또는 two_factor
+    - domain: transmission.example.com # 실제 도메인으로 변경하세요
+      policy: one_factor
+
+# 세션 설정
+session:
+  name: authelia_session
+  # 세션 비밀키: 반드시 변경하세요!
+  secret: "generate_your_own_secret"  # openssl rand -base64 32 로 생성
+  expiration: 3600    # 세션 만료 시간(초)
+  inactivity: 300     # 비활성 시간(초)
+  remember_me: 1M     # 자동 로그인 지속 시간
+  cookies:
+    - domain: example.com  # 실제 도메인으로 변경하세요
+      same_site: lax
+      authelia_url: https://authelia.example.com        # 실제 URL로 변경하세요
+      default_redirection_url: https://example.com      # 실제 URL로 변경하세요
+
+# 로그인 시도 제한 설정
+regulation:
+  max_retries: 3      # 최대 시도 횟수
+  find_time: 120      # 시도 횟수 측정 시간(초)
+  ban_time: 300       # 차단 시간(초)
+
+# 스토리지 설정
+storage:
+  local:
+    path: /config/db.sqlite3
+  # 암호화 키: 반드시 변경하세요!
+  encryption_key: "generate_your_own_key"  # openssl rand -hex 64 로 생성
+
+# 비밀번호 재설정 설정
+identity_validation:
+  reset_password:
+    # JWT 비밀키: 반드시 변경하세요!
+    jwt_secret: "generate_your_own_secret"  # openssl rand -hex 64 로 생성
+
+# 알림 설정
+notifier:
+  # 파일시스템 기반 알림 저장
+  filesystem:
+    filename: /config/notification.txt

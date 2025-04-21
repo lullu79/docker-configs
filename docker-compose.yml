@@ -35,6 +35,10 @@ services:
       - "traefik.http.routers.dashboard.rule=Host(`${TRAEFIK_DASHBOARD_DOMAIN}`)"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
+      - "traefik.http.routers.dashboard.middlewares=authelia@docker"
+    depends_on:
+      authelia:
+        condition: service_healthy
 
   iptime:
     image: alpine/socat
@@ -59,7 +63,7 @@ services:
       - PLEX_CLAIM=${PLEX_CLAIM}
       - ADVERTISE_IP=${PLEX_ADVERTISE_IP}
     volumes:
-      - ~/docker-configs/plexmediaserver:/config
+      - ./plexmediaserver:/config
       - ~/plexmediaserver:/plexmediaserver
       - ~/transmission:/transmission
     devices:
@@ -81,51 +85,66 @@ services:
       - "traefik.http.routers.plex.entrypoints=websecure"
       - "traefik.http.routers.plex.tls=true"
       - "traefik.http.routers.plex.tls.certresolver=myresolver"
-      - "traefik.http.services.plex.loadbalancer.server.port=32400"    
+      - "traefik.http.services.plex.loadbalancer.server.port=32400"
 
-  deluge:
-    image: ghcr.io/linuxserver/deluge:latest
-    container_name: deluge
+  transmission:
+    image: linuxserver/transmission
+    container_name: transmission
     restart: unless-stopped
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Seoul
     volumes:
-      - ~/docker-configs/deluge:/config
+      - ./transmission:/config
       - ~/transmission:/downloads
+      - ~/transmission:/watch
     networks:
       - traefik-proxy
     ports:
-      - 8112:8112
-      - 6881:6881
-      - 6881:6881/udp
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.deluge.rule=Host(`${DELUGE_DOMAIN}`)"
-      - "traefik.http.routers.deluge.entrypoints=websecure"
-      - "traefik.http.routers.deluge.tls=true"
-      - "traefik.http.routers.deluge.tls.certresolver=myresolver"
-      - "traefik.http.services.deluge.loadbalancer.server.port=8112"
+      - "traefik.http.routers.transmission.rule=Host(`${TRANSMISSION_DOMAIN}`)"
+      - "traefik.http.routers.transmission.entrypoints=websecure"
+      - "traefik.http.routers.transmission.tls=true"
+      - "traefik.http.routers.transmission.tls.certresolver=myresolver"
+      - "traefik.http.routers.transmission.middlewares=authelia@docker"
+      - "traefik.http.services.transmission.loadbalancer.server.port=9091"
+    depends_on:
+      authelia:
+        condition: service_healthy
 
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
     restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
+    environment:
+      - TZ=Asia/Seoul
+      - PUID=1000
+      - PGID=1000
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./portainer:/data
+      - ./authelia:/config
     networks:
       - traefik-proxy
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9092/api/health" ]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(`${PORTAINER_DOMAIN}`)"
-      - "traefik.http.routers.portainer.entrypoints=websecure"
-      - "traefik.http.routers.portainer.tls=true"
-      - "traefik.http.routers.portainer.tls.certresolver=myresolver"
-      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.authelia.rule=Host(`${AUTHELIA_DOMAIN}`)"
+      - "traefik.http.routers.authelia.entrypoints=websecure"
+      - "traefik.http.routers.authelia.tls=true"
+      - "traefik.http.routers.authelia.tls.certresolver=myresolver"
+      - "traefik.http.services.authelia.loadbalancer.server.port=9092"
+      - "traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9092/api/verify?rd=https://${AUTHELIA_DOMAIN}"
+      - "traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email"
 
 networks:
   traefik-proxy:

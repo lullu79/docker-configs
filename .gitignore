@@ -6,15 +6,18 @@ traefik/acme/*
 !traefik/acme/.gitkeep
 traefik/acme/acme.json
 
-# OS files
-.DS_Store
-*.log
-
 # Plex Media Server
 plexmediaserver
 
-# Deluge
-deluge
+# Transmission
+transmission
 
-# Portainter
-portainer
+# Authelia
+authelia/configuration.yml
+authelia/users/users.yml
+authelia/db.sqlite3
+authelia/notification.txt
+
+# OS files
+.DS_Store
+*.log

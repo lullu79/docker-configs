@@ -1,0 +1,23 @@
+# Authelia 사용자 설정 파일 예제
+# 실제 사용 시 이 파일을 users.yml로 복사하여 사용하세요
+
+# 비밀번호 해시 생성 명령어:
+# docker run --rm authelia/authelia:latest authelia crypto hash generate argon2 --password '설정할_비밀번호'
+
+---
+users:
+  admin:  # 사용자 ID
+    displayname: "관리자"  # 표시될 이름
+    # 아래 비밀번호는 'password123'의 해시값입니다. 반드시 변경하세요!
+    password: "$argon2id$v=19$m=65536,t=3,p=4$RD8OI12PQPFK1GhvAiEhhw$ZFrsdhELFCsfl0/QKWWgQ4Ygcd5X5i/WE1uo10LcLYs"
+    email: admin@example.com  # 이메일 주소
+    groups:
+      - admins  # 사용자 그룹
+
+  user1:  # 일반 사용자 예제
+    displayname: "일반 사용자"
+    # 비밀번호 해시는 위의 명령어로 생성하여 입력하세요
+    password: "$argon2id$v=19$m=65536,t=3,p=4$EXAMPLE_HASH"  # 실제 해시로 변경하세요
+    email: user1@example.com
+    groups:
+      - users  # 일반 사용자 그룹
